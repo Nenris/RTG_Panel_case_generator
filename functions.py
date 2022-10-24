@@ -115,7 +115,7 @@ def create_row(name, start_date, end_date):
 
 # Создаем новый файл с кейсом
 def create_file(file_name):
-    with open(file_name, 'w', encoding='utf-8', newline='') as result:
+    with open('cases\\' + file_name, 'w', encoding='utf-8', newline='') as result:
         writer = csv.writer(result)
         writer.writerow(('campaign_name', 'reshuffle_date', 'next_reshuffle_date'))
         result.close()
@@ -123,7 +123,7 @@ def create_file(file_name):
 
 # Дописываем новые строки в существующий файл
 def write_to_file(file_name, row):
-    with open(file_name, 'a', encoding='utf-8', newline='') as result:
+    with open('cases\\' + file_name, 'a', encoding='utf-8', newline='') as result:
         writer = csv.writer(result)
         writer.writerow(row)
     result.close()
