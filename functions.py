@@ -2,6 +2,7 @@ import constants
 import random
 import datetime
 import csv
+import os
 
 
 # Функции для получени параметров имени кампании и дат Reshuffle_date и Next_reshuffle_date
@@ -115,7 +116,9 @@ def create_row(name, start_date, end_date):
 
 # Создаем новый файл с кейсом
 def create_file(file_name):
-    with open('cases\\' + file_name, 'w', encoding='utf-8', newline='') as result:
+    if not os.path.exists('cases'):
+        os.mkdir('cases')
+    with open('cases' + os.sep + file_name, 'w', encoding='utf-8', newline='') as result:
         writer = csv.writer(result)
         writer.writerow(('campaign_name', 'reshuffle_date', 'next_reshuffle_date'))
         result.close()
@@ -123,15 +126,33 @@ def create_file(file_name):
 
 # Дописываем новые строки в существующий файл
 def write_to_file(file_name, row):
-    with open('cases\\' + file_name, 'a', encoding='utf-8', newline='') as result:
+    with open('cases' + os.sep + file_name, 'a', encoding='utf-8', newline='') as result:
         writer = csv.writer(result)
         writer.writerow(row)
     result.close()
 
 
+def typo_generator(row):
+    typo_type = random.randint(1,2)
+    if typo_type == 1: # Удаление случайного символа или нескольких
+        if len(row) <= 10:
+            cutoff = random.randint(1, 8)
+            result = row[:cutoff] + row[cutoff + 1:]
+            return result
+        else:
+            cutoff = random.randint(1, 70)
+            result = row[:cutoff] + row[cutoff + random.randint(1,5):]
+            return result
+    elif typo_type == 2: #Добавление лишних символов
+        symbols = 'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890-_'
+        typo_place = random.randint(0,70)
+        result = row[:typo_place] + random.choice(symbols) + row[typo_place:]
+        return result
+
+
 # Кейс 1. Тесты для успешного импорта
 def successful_import(row_number):
-    file_name = 'successful_import.csv'
+    file_name = '1_successful_import.csv'
     create_file(file_name)
     for _ in range(row_number):
         campaign_name = get_campaign_name()
@@ -143,7 +164,7 @@ def successful_import(row_number):
 
 # Кейс 2. Тесты успешно импортируются, в файле есть по 2 периода для каждой кампании
 def successful_import_2_periods_per_campaign(row_number):
-    file_name = 'successful_import_2_periods_per_campaign.csv'
+    file_name = '2_successful_import_two_periods_per_campaign.csv'
     create_file(file_name)
     while row_number > 0:
         campaign_name = get_campaign_name()
@@ -161,47 +182,55 @@ def successful_import_2_periods_per_campaign(row_number):
         row_number -= 1
 
 
-# Кейс 3. 2 файла, некоторый тесты из файла 1 повторяются в файле 2
+# Кейс 3. 2 файла, некоторые тесты из файла 1 повторяются в файле 2
 def duplicates(row_number):
     duplicate_row = 1
-    file_name_1 = 'duplicates_1.csv'
-    file_name_2 = 'duplicates_2.csv'
+    file_name_1 = '3_duplicates_1.csv'
+    file_name_2 = '3_duplicates_2.csv'
+    error_file_name = '3_error_rows.txt'
     create_file(file_name_1)
     create_file(file_name_2)
+    error_list = []
     # Цикл создает набор случайных записей в два файла, при этом гарантированно копирует случайные строки из файла 1 в файл 2 (каждую n строку,
     # при этом n - случайное число в диапазоне от 2 до общего числа строк, или до 10 (смотря что меньше). Если в файле всего 1 строка, она будет скопирована)
     if row_number > 1 and row_number <= 10:
         duplicate_row = random.randint(2, row_number)
     elif row_number > 10:
         duplicate_row = random.randint(2, 10)
-    counter = 0
-    for _ in range(row_number):
+        counter = 0
+    for counter in range(row_number):
         campaign_name = get_campaign_name()
         start_date = get_start_date(0)
         end_date = get_end_date(start_date, 1)
         row = create_row(campaign_name, start_date, end_date)
         write_to_file(file_name_1, row)
-        counter += 1
-        if counter % duplicate_row == 0:
+        if (counter + 1) % duplicate_row == 0 and counter < row_number:
             write_to_file(file_name_2, row)
+            error_list.append(counter + 2)
         else:
             campaign_name = get_campaign_name()
             start_date = get_start_date(0)
             end_date = get_end_date(start_date, 1)
             row = create_row(campaign_name, start_date, end_date)
             write_to_file(file_name_2, row)
+    with open('cases' + os.sep + error_file_name, 'w', encoding='utf-8', newline='') as result:
+        writer = csv.writer(result)
+        writer.writerow(error_list)
 
 
 # Кейс 4. Импорт файла, в котором встречаются тесты для одной кампании с пересекающимися периодами
 def intersections_same_file(row_number):
-    file_name = 'intersections_same_file.csv'
+    file_name = '4_intersections_same_file.csv'
+    error_file_name = '4_error_rows.txt'
+    error_list = []
     duplicate_row = 1
     if row_number > 1 and row_number <= 10:
         duplicate_row = random.randint(2, row_number)
     elif row_number > 5:
         duplicate_row = random.randint(2, 5)
     create_file(file_name)
-    for counter in range(row_number):
+    counter = 0
+    while counter < row_number:
         campaign_name = get_campaign_name()
         start_date = get_start_date(0)
         end_date = get_end_date(start_date, 3)
@@ -214,12 +243,23 @@ def intersections_same_file(row_number):
             row = create_row(campaign_name, start_date, end_date)
             write_to_file(file_name, row)
             counter += 1
+            error_list.append(counter + 1)
+#        else:
+#            campaign_name = get_campaign_name()
+#            start_date = get_start_date(0)
+#            end_date = get_end_date(start_date, 3)
+#            row = create_row(campaign_name, start_date, end_date)
+#            write_to_file(file_name, row)
+#            counter += 1
+    with open('cases' + os.sep + error_file_name, 'w', encoding='utf-8', newline='') as result:
+        writer = csv.writer(result)
+        writer.writerow(error_list)
 
 
 # Кейс 5. Импорт двух файлов, в которых встречаются тесты для одной кампании с пересекающимися периодами
 def intersections_different_files(row_number):
-    file_name_1 = 'intersections_different_files_1.csv'
-    file_name_2 = 'intersections_different_files_2.csv'
+    file_name_1 = '5_intersections_different_files_1.csv'
+    file_name_2 = '5_intersections_different_files_2.csv'
     duplicate_row = 1
     if row_number > 1 and row_number <= 10:
         duplicate_row = random.randint(2, row_number)
@@ -228,22 +268,71 @@ def intersections_different_files(row_number):
     create_file(file_name_1)
     create_file(file_name_2)
     for counter in range(row_number):
-        campaign_name = get_campaign_name()
-        start_date = get_start_date(0)
-        end_date = get_end_date(start_date, 3)
-        row = create_row(campaign_name, start_date, end_date)
-        write_to_file(file_name_1, row)
-        counter += 1
-        if counter % duplicate_row == 0 and counter < row_number:
-            start_date = get_start_date(random.choice([i for i in range(-2, 2) if i != 0]))
+        if (counter + 1) % duplicate_row == 0 and counter < row_number:
+            start_date = get_start_date(random.choice([i for i in range(-2, 3) if i != 0]))
             end_date = get_end_date(start_date, 3)
             row = create_row(campaign_name, start_date, end_date)
             write_to_file(file_name_2, row)
             counter += 1
         else:
             campaign_name = get_campaign_name()
-            start_date = get_start_date(random.choice([i for i in range(-2, 2) if i != 0]))
+            start_date = get_start_date(0)
             end_date = get_end_date(start_date, 3)
             row = create_row(campaign_name, start_date, end_date)
             write_to_file(file_name_2, row)
             counter += 1
+
+
+# Кейс 6. Импорт теста с датой завершения раньше даты начала
+def end_date_before_start_date(row_number):
+    file_name = '6_end_date_before_start_date.csv'
+    create_file(file_name)
+    error_row = 1
+    if row_number > 1 and row_number < 5:
+        error_row = random.randint(2,row_number)
+    elif row_number > 5:
+        error_row = random.randint(2, 5)
+    for counter in range(row_number):
+        if (counter + 1) % error_row == 0 and counter < row_number:
+            campaign_name = get_campaign_name()
+            start_date = get_start_date(0)
+            end_date = get_end_date(start_date, -2)
+            row = create_row(campaign_name, start_date, end_date)
+            write_to_file(file_name, row)
+        else:
+            campaign_name = get_campaign_name()
+            start_date = get_start_date(0)
+            end_date = get_end_date(start_date, 1)
+            row = create_row(campaign_name, start_date, end_date)
+            write_to_file(file_name, row)
+
+
+# Кейс 7. Импорт теста с опечаткой
+def test_with_typo(row_number):
+    file_name = '7_test_with_typo.csv'
+    create_file(file_name)
+    error_row = 1
+    if row_number > 1 and row_number < 3:
+        error_row = random.randint(2, row_number)
+    elif row_number > 3:
+        error_row = random.randint(2, 3)
+    for counter in range(row_number):
+        if (counter + 1) % error_row == 0 and counter < row_number:
+            campaign_name = get_campaign_name()
+            start_date = get_start_date(0)
+            end_date = get_end_date(start_date, -2)
+            part_to_typo = random.randint(1,3)
+            if part_to_typo == 1:
+                campaign_name = typo_generator(campaign_name)
+            elif part_to_typo == 2:
+                start_date = typo_generator(start_date)
+            elif part_to_typo == 3:
+                end_date = typo_generator(end_date)
+            row = create_row(campaign_name, start_date, end_date)
+            write_to_file(file_name, row)
+        else:
+            campaign_name = get_campaign_name()
+            start_date = get_start_date(0)
+            end_date = get_end_date(start_date, 1)
+            row = create_row(campaign_name, start_date, end_date)
+            write_to_file(file_name, row)
