@@ -1,4 +1,4 @@
-import functions
+from functions import *
 
 
 print('Какой кейс сгенерировать?')
@@ -17,50 +17,50 @@ mode = int(input())
 if mode == 1: # Успешный импорт тестов (разные кампании, без повторов одной кампании)
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.successful_import(row_number)
+    successful_import(row_number)
 
 elif mode == 2: # Успешный импорт тестов (разные кампании и разные периоды для одной кампании)
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.successful_import_2_periods_per_campaign(row_number)
+    successful_import_2_periods_per_campaign(row_number)
 
 elif mode == 3: # Импорт дубликатов
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.duplicates(row_number)
+    duplicates(row_number)
 
 elif mode == 4: # Импорт файла, в котором встречаются тесты для одной кампании с пересекающимися периодами
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.intersections_same_file(row_number)
+    intersections_same_file(row_number)
 
 elif mode == 5: # Импорт файлов, в которых встречаются тесты для одной кампании с пересекающимися периодами
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.intersections_different_files(row_number)
+    intersections_different_files(row_number)
 
 elif mode == 6:  # Импорт теста с датой завершения раньше даты началаи
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.end_date_before_start_date(row_number)
+    end_date_before_start_date(row_number)
 
 elif mode == 7:  # Импорт теста с опечаткой
     print('Сколько строк сгенерировать?')
     row_number = int(input())
-    functions.test_with_typo(row_number)
+    test_with_typo(row_number)
 
-elif mode == 9:
+elif mode == 9: # Информация о документации
     print('Структура наименования кампании: https://docs.google.com/spreadsheets/d/1aHG5jvSKhzxiozg1-p9P5fgxw_dliEL00v2VEr9DcAA/edit#gid=1913779860')
     print()
     print('ТЗ на разработку RTG Panel: https://knowledge.playrix.com/pages/viewpage.action?pageId=197891928')
     input()
 
-elif mode == 0:
+elif mode == 0: # Создание всех кейсов
     row_number = 20
-    functions.successful_import(row_number)
-    functions.successful_import_2_periods_per_campaign(row_number)
-    functions.duplicates(row_number)
-    functions.intersections_same_file(row_number)
-    functions.intersections_different_files(row_number)
-    functions.end_date_before_start_date(row_number)
-    functions.test_with_typo(row_number)
+    successful_import(row_number)
+    successful_import_2_periods_per_campaign(row_number)
+    duplicates(row_number)
+    intersections_same_file(row_number)
+    intersections_different_files(row_number)
+    end_date_before_start_date(row_number)
+    test_with_typo(row_number)

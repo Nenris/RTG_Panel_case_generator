@@ -336,7 +336,7 @@ def test_with_typo(row_number):
         if (counter + 1) % error_row == 0 and counter < row_number:
             campaign_name = get_campaign_name()
             start_date = get_start_date(0)
-            end_date = get_end_date(start_date, -2)
+            end_date = get_end_date(start_date, 1)
             part_to_typo = random.randint(1,3)
             if part_to_typo == 1:
                 campaign_name = typo_generator(campaign_name)
