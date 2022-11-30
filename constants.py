@@ -17,6 +17,11 @@ platform = [
     "iOS",
 ]
 
+splitter = [
+    "_",
+    "-",
+]
+
 geo = [
     "US",
     "Tier",

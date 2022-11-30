@@ -76,7 +76,7 @@ def _get_campaign_name():
     campaign_type = _get_campaign_type()
     channel = _get_channel()
     platform = _get_platform()
-    app = _get_app() + "-" + platform
+    app = _get_app() + random.choice(constants.splitter) + platform
     geo = _get_geo(channel)
     days_of_inactivity = _get_days_of_inactivity()
     payer_type = _get_payer_type()
